@@ -19,7 +19,7 @@ def digit_version(version_str):
 
 
 mmcv_minimum_version = '1.5.2'
-mmcv_maximum_version = '1.7.0'
+mmcv_maximum_version = '1.7.1'  # B200: keep cu128-built mmcv-full 1.7.1 (API-compat with 1.7.0)
 mmcv_version = digit_version(mmcv.__version__)
 
 

@@ -90,6 +90,10 @@ class LoadPointsFromFile_UDA(object):
         if 'DeepAccident' in pts_filename or 'Town' in pts_filename:
             points = np.load(pts_filename)
             points = points['data']
+        elif pts_filename.endswith('.npz'):
+            # CARLA geobev LIDAR sweeps: .npz with key 'data' (N,3 xyz)
+            _z = np.load(pts_filename)
+            points = _z['data'] if 'data' in _z else _z[_z.files[0]]
         else:
             if self.file_client is None:
                 self.file_client = mmcv.FileClient(**self.file_client_args)

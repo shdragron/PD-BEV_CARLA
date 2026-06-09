@@ -9,6 +9,7 @@ from .lyft_dataset import LyftDataset
 from .shift_dataset import ShiftDataset_my
 from .CARLA_dataset import CarlaDataset
 from .DeepAccident_dataset import DeepAccidentDataset
+from .carla_pdbev_dataset import CarlaPDBEVDataset
 from .lyft_dataset_DA import LyftDataset_DA
 from .nuscenes_dataset import NuScenesDataset
 from .nuscenes_dataset_DA import NuScenesDataset_DA
@@ -39,7 +40,7 @@ __all__ = [
     'KittiDataset', 'KittiMonoDataset', 'build_dataloader', 'DATASETS',
     'build_dataset', 'NuScenesDataset', 'NuScenesMonoDataset', 'LyftDataset',
     'LyftDataset_my', 'ShiftDataset_my', 'LyftDataset_my1', 'LyftDataset_DA',
-    'CarlaDataset', 'DeepAccidentDataset',
+    'CarlaDataset', 'DeepAccidentDataset', 'CarlaPDBEVDataset',
     'ObjectSample', 'RandomFlip3D', 'ObjectNoise', 'GlobalRotScaleTrans',
     'PointShuffle', 'ObjectRangeFilter', 'PointsRangeFilter',
     'LoadPointsFromFile', 'S3DISSegDataset', 'S3DISDataset',

@@ -1,0 +1,16 @@
+# byte-compiled / build artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+
+# training outputs / data (machine-local, large)
+work_dirs/
+wandb/
+data/
+*.pth
+*.ckpt
+*.pkl
+*.log
