@@ -807,6 +807,57 @@ class PointToMultiViewDepth_UDA(object):
         return results
 
 
+@PIPELINES.register_module()
+class CarlaDPTMultiViewDepth_UDA(PointToMultiViewDepth_UDA):
+    """Depth GT from per-camera dense CARLA DPT depth images (drop-in for
+    PointToMultiViewDepth_UDA -- same gt_depth / gt_depth_real keys, shapes and
+    virtual-depth normalization). Only the (u, v, depth) source changes: a dense
+    per-pixel value decoded from the rendered DPT PNG instead of sparse projected
+    LiDAR returns. No LoadPointsFromFile_UDA needed in the pipeline.
+
+    CARLA DPT is an RGB-encoded PNG at the ORIGINAL image size (900x1600) storing
+    PLANAR Z-depth (verified vs LiDAR projection: median DPT/z == 0.998), matching
+    the camera-frame z the LiDAR path uses. depth_m = (R + G*256 + B*256^2)
+    / (256^3 - 1) * 1000 (sky ~ 1000 m, dropped by the depth<100 gate).
+    Per-vehicle is handled by deriving the DPT path from the RGB path
+    (RGB->DPT, .jpg->.png): RGB-CAM_FRONT -> DPT-CAM_FRONT (sedan),
+    RGB-suv-* -> DPT-suv-* (suv), RGB-bus-* -> DPT-bus-* (bus).
+    """
+
+    def __call__(self, results):
+        from PIL import Image
+        imgs = results['img_inputs'][0]
+        post_rots = results['img_inputs'][4]
+        post_trans = results['img_inputs'][5]
+        act_intrins = results['img_inputs'][7]
+        h0, w0 = 900, 1600          # original CARLA image size
+        uu, vv = np.meshgrid(np.arange(w0, dtype=np.float32),
+                             np.arange(h0, dtype=np.float32))
+        uu = torch.from_numpy(uu.reshape(-1))
+        vv = torch.from_numpy(vv.reshape(-1))
+        depth_map_list, depth_map_list_real = [], []
+        for cid, cam_name in enumerate(results['cam_names']):
+            rgb_path = results['curr']['cams'][cam_name]['data_path']
+            dpt_path = rgb_path.replace('RGB', 'DPT').replace('.jpg', '.png')
+            mmcv.check_file_exist(dpt_path)
+            dpt = np.asarray(Image.open(dpt_path).convert('RGB'))
+            depth = ((dpt[..., 0].astype(np.float32)
+                      + dpt[..., 1].astype(np.float32) * 256.0
+                      + dpt[..., 2].astype(np.float32) * 256.0 ** 2)
+                     / (256.0 ** 3 - 1.0) * 1000.0).reshape(-1)
+            pts = torch.stack([uu, vv, torch.from_numpy(depth)], dim=1)
+            # same image-aug affine as the LiDAR path; depth (col 2) rides through
+            pts = pts.matmul(post_rots[cid].T) + post_trans[cid:cid + 1, :]
+            act_intrin = act_intrins[cid, :, :]
+            depth_map_list_real.append(self.points2depthmap_real(
+                pts, imgs.shape[2], imgs.shape[3], act_intrin))
+            depth_map_list.append(self.points2depthmap_vitural(
+                pts, imgs.shape[2], imgs.shape[3], act_intrin))
+        results['gt_depth'] = torch.stack(depth_map_list)
+        results['gt_depth_real'] = torch.stack(depth_map_list_real)
+        return results
+
+
 
 
 @PIPELINES.register_module()

@@ -1,5 +1,5 @@
-# EVAL config for the PD-BEV CARLA BUS oracle (attempt-5, authors-native depth regime).
-# MUST architecturally match the bus training config: input 384x704, depth grid [1,100,1]
+# EVAL config for the PD-BEV CARLA SEDAN (native384 retrain) (attempt-5, authors-native depth regime).
+# MUST architecturally match the sedan384 training config: input 384x704, depth grid [1,100,1]
 # (depthnet D=100), else the checkpoint does not load. Deterministic IDA, no aug.
 _base_ = ['./bevdepth-r50-cbgs-pc-carla.py']
 
@@ -45,5 +45,5 @@ test_pipeline = [
 ]
 
 data = dict(
-    val=dict(ann_file='data/bevdet_infos/bus_infos_val.pkl', pipeline=test_pipeline),
-    test=dict(ann_file='data/bevdet_infos/bus_infos_val.pkl', pipeline=test_pipeline))
+    val=dict(ann_file='data/bevdet_infos/sedan_infos_val.pkl', pipeline=test_pipeline),
+    test=dict(ann_file='data/bevdet_infos/sedan_infos_val.pkl', pipeline=test_pipeline))

@@ -1,4 +1,4 @@
-# PD-BEV CARLA SUV oracle — attempt-5 (OPTION-2: authors-native depth regime, from scratch).
+# PD-BEV CARLA SEDAN retrain — attempt-5 (OPTION-2: authors-native depth regime, from scratch).
 #
 # Root cause of attempts 1/2/4 (probed): PD-BEV supervises depth ONLY at GT box centers
 # (~5% of pixels, virtual depth = real*450/fx'); the other 95% are anchored solely by the
@@ -71,15 +71,15 @@ lr_config = dict(policy='step', warmup='linear', warmup_iters=1000, warmup_ratio
 
 data = dict(
     samples_per_gpu=16,               # keep eff-batch 64 (16 x 2gpu x accum2); ~75GB/GPU at 384x704
-    train=dict(ann_file='data/bevdet_infos/suv_infos_train.pkl',
+    train=dict(ann_file='data/bevdet_infos/sedan_infos_train.pkl',
                pipeline=train_pipeline),
-    val=dict(ann_file='data/bevdet_infos/suv_infos_val.pkl'),
-    test=dict(ann_file='data/bevdet_infos/suv_infos_val.pkl'))
+    val=dict(ann_file='data/bevdet_infos/sedan_infos_val.pkl'),
+    test=dict(ann_file='data/bevdet_infos/sedan_infos_val.pkl'))
 
 log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='WandbLoggerHook',
-             init_kwargs=dict(project='PDBEV-CARLA', entity='Robust_Ex', name='pdbev_carla_suv_native384')),
+             init_kwargs=dict(project='PDBEV-CARLA', entity='Robust_Ex', name='pdbev_carla_sedan_native384')),
     ])
